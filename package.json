@@ -1,0 +1,24 @@
+{
+  "name": "kazoo-webhook-zoho",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/reperio/kazoo-webhook-zoho.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/reperio/kazoo-webhook-zoho/issues"
+  },
+  "homepage": "https://github.com/reperio/kazoo-webhook-zoho#readme",
+  "dependencies": {
+    "hapi": "^17.2.0",
+    "moment": "^2.20.1"
+  }
+}
