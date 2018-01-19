@@ -1,0 +1,18 @@
+{
+    "dictionary": {
+        "interval": 1000,
+        "retention": 30000
+    },
+    "logging": {
+        "directory": "./logs",
+        "level": "debug"
+    },
+    "server": {
+        "host": "0.0.0.0",
+        "port": 8080
+    },
+    "zoho": {
+        "authToken": "32f75555e96acc667f0278c357234ec9",
+        "url": "https://crm.zoho.com/crm/private/xml/Calls/insertRecords"
+    }
+}
