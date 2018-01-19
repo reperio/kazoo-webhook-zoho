@@ -6,6 +6,7 @@ const winston = require('winston');
 require('winston-daily-rotate-file');
 
 const Dictionary = require('./dictionary');
+const CrmApi = require('./crmApi');
 
 const env = process.env.NODE_ENV || 'development';
 const configFilePath = path.join(__dirname, "config", env + ".json");
@@ -13,6 +14,8 @@ const userConfigFilePath = path.join(__dirname, "config", env + ".user.json");
 nconf
     .file("user_overrides", userConfigFilePath)
     .file("defaults", configFilePath);
+
+const inBoundNumbers = nconf.get('kazoo:numbers');
 
 //create a server
 const server = new Hapi.Server({
@@ -81,6 +84,7 @@ server.app.logger = app_logger;
 server.app.trace_logger = trace_logger;
 
 const dict = new Dictionary(nconf, app_logger);
+const crmApi = new CrmApi(nconf, app_logger);
 
 //make sure unhandled exceptions are logged
 server.events.on({ name: 'request', channels: 'error' }, (request, event, tags) => {
@@ -93,20 +97,29 @@ server.route({
     path: '/',
     handler: (request) => {
         const callRecord = request.payload;
+
+        
+
         if (callRecord !== null) {
-            //check the dictionary to see if the call has been processed already
-            if (dict.hasKey(callRecord.call_id)) {
-                request.server.app.logger.info(`Recieved call - ${callRecord.call_id}`);
+            call_to = callRecord.to.substr(1, 11);
 
-                //add the call to the dictionary so we don't process it again
-                dict.save(callRecord.call_id, moment());
-                request.server.app.logger.info(`Added dictionary key - ${callRecord.call_id}`);
+            inBoundNumbers.foreach(number => {
+                if (number == call_to) {
+                    //check the dictionary to see if the call has been processed already
+                    if (dict.hasKey(callRecord.call_id)) {
+                        request.server.app.logger.info(`Recieved call - ${callRecord.call_id}`);
 
-                /* Call Processing Logic */
-            } else {
-                //call was already proccessed, so ignore it 
-                request.server.app.logger.warn(`Recieved duplicate call - ${callRecord.call_id}`);
-            }
+                        //add the call to the dictionary so we don't process it again
+                        dict.save(callRecord.call_id, moment());
+                        request.server.app.logger.info(`Added dictionary key - ${callRecord.call_id}`);
+
+                        crmApi.sendCall(callRecord);
+                    } else {
+                        //call was already proccessed, so ignore it 
+                        request.server.app.logger.warn(`Recieved duplicate call - ${callRecord.call_id}`);
+                    }
+                }
+            });
         }
         return '';
     }

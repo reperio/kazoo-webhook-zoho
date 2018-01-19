@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/reperio/kazoo-webhook-zoho#readme",
   "dependencies": {
+    "camaro": "^2.2.3",
     "hapi": "^17.2.0",
     "moment": "^2.20.1",
     "nconf": "^0.10.0",
