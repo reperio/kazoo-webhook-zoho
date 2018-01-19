@@ -16,7 +16,7 @@ nconf
     .file("defaults", configFilePath);
 
 const inBoundNumbers = nconf.get('kazoo:numbers');
-
+console.log("inBoundNumbers: " + JSON.stringify(inBoundNumbers));
 //create a server
 const server = new Hapi.Server({
     port: nconf.get('server:port'),
@@ -84,6 +84,7 @@ server.app.logger = app_logger;
 server.app.trace_logger = trace_logger;
 
 const dict = new Dictionary(nconf, app_logger);
+dict.cleanKeys(true);
 const crmApi = new CrmApi(nconf, app_logger);
 
 //make sure unhandled exceptions are logged
@@ -98,28 +99,27 @@ server.route({
     handler: (request) => {
         const callRecord = request.payload;
 
-        
-
         if (callRecord !== null) {
             call_to = callRecord.to.substr(1, 11);
 
-            inBoundNumbers.foreach(number => {
-                if (number == call_to) {
+            for(let i=0;i<inBoundNumbers.length;i++) {
+                if (inBoundNumbers[i] === call_to) {
                     //check the dictionary to see if the call has been processed already
-                    if (dict.hasKey(callRecord.call_id)) {
+                    if (!dict.hasKey(callRecord.call_id)) {
                         request.server.app.logger.info(`Recieved call - ${callRecord.call_id}`);
 
                         //add the call to the dictionary so we don't process it again
                         dict.save(callRecord.call_id, moment());
                         request.server.app.logger.info(`Added dictionary key - ${callRecord.call_id}`);
 
+                        //forward the call record to zoho
                         crmApi.sendCall(callRecord);
                     } else {
                         //call was already proccessed, so ignore it 
                         request.server.app.logger.warn(`Recieved duplicate call - ${callRecord.call_id}`);
                     }
                 }
-            });
+            }
         }
         return '';
     }

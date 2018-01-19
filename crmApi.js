@@ -9,8 +9,6 @@ class CrmApi {
 
         this.url = config.get('zoho:url');
         this.authToken = config.get('zoho:authToken');
-        // this.xmlParser = new xml.Parser();
-        // this.xmlBuilder = new xml.Builder();
     }
 
     async sendCall(callRecord) {
@@ -68,17 +66,6 @@ class CrmApi {
     
     async parseXml(xmlObject) {
         this._logger.debug(xmlObject);
-        // return new Promise(resolve => {
-        //     this.xmlParser.parseString(xmlObject, {ignoreAttrs : false, mergeAttrs : true},function (err, result) {
-        //         if (err) {
-        //             this._logger.error('Error parsing zoho response data');
-        //             this._logger.error(err);
-        //             throw err;
-        //         }
-
-        //         resolve(result);
-        //     });
-        // });
 
         return new Promise(resolve => {
             const temp = {
