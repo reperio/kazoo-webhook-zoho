@@ -17,18 +17,21 @@ class Dictionary {
     }
 
     hasKey(key) {
-        return typeof this.dict[key] === 'undefined';
+        return !(typeof this.dict[key] === 'undefined');
     }
 
     save(key) {
         this.dict[key] = moment();
+        return this.dict[key];
     }
 
-    saveWithValue(key, value) {
-        this.dict[key] = value;
-    }
+    cleanKeys(cleanAll) {
+        cleanAll = cleanAll || false;
+        if (cleanAll) {
+            this.dict = {};
+            return;
+        }
 
-    cleanKeys() {
         const keys = Object.keys(this.dict);
         keys.forEach( key => {
             const duration = moment.duration(moment().diff(this.dict[key]));
