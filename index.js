@@ -4,6 +4,7 @@ const nconf = require('nconf');
 const path = require('path');
 const winston = require('winston');
 require('winston-daily-rotate-file');
+const phoneFormatter = require('phone-formatter');
 
 const Dictionary = require('./dictionary');
 const CrmApi = require('./crmApi');
@@ -100,10 +101,11 @@ server.route({
         const callRecord = request.payload;
 
         if (callRecord !== null) {
-            call_to = callRecord.to.substr(1, 11);
+            callTo = callRecord.to.split('@');
+            calledNumber = callTo[0].substr(1);
 
             for(let i=0;i<inBoundNumbers.length;i++) {
-                if (inBoundNumbers[i] === call_to) {
+                if (inBoundNumbers[i] === calledNumber && callRecord.call_direction === 'inbound') {
                     //check the dictionary to see if the call has been processed already
                     if (!dict.hasKey(callRecord.call_id)) {
                         request.server.app.logger.info(`Recieved call - ${callRecord.call_id}`);

@@ -17,6 +17,7 @@ class CrmApi {
 
         try {
             const callParameters = await this.buildParameters(callRecord);
+            this._logger.info(`Sending the following information to zoho: ${JSON.stringify(callParameters)}`);
             const xmlObject = this.buildXml(callParameters);
             const httpOptions = {
                 uri: this.url + 'Calls/insertRecords',
@@ -48,14 +49,14 @@ class CrmApi {
     async buildParameters(callRecord) {
         let parameters = [];
 
-        parameters.push({ name: 'Subject', value: callRecord.caller_id_name});
+        parameters.push({ name: 'Subject', value: `Call from ${callRecord.caller_id_name || 'Unknown Name'} ${callRecord.caller_id_number ? phoneFormatter.format(callRecord.caller_id_number, '(NNN)NNN-NNNN') : 'Unknown Number'}`});
         parameters.push({ name: 'Call Type', value: callRecord.call_direction});
         parameters.push({ name: 'Call Start Time', value: moment.unix(callRecord.timestamp - 62167219200).format('YYYY-MM-DD hh:mm:ss') });
-        parameters.push({ name: 'Call Duration', value: `${callRecord.duration_seconds / 60}:${callRecord.duration_seconds % 60}`});
+        parameters.push({ name: 'Call Duration', value: `${callRecord.duration_seconds >= 60 ? Math.floor(callRecord.duration_seconds / 60) : '00'}:${callRecord.duration_seconds % 60 < 10 ? '0' + callRecord.duration_seconds % 60 : callRecord.duration_seconds % 60}`});
 
         try {
             let contactId = null;
-            const fromNumber = callRecord.from.substr(1, 10);
+            const fromNumber = callRecord.from.substr(1, 11);
             contactId = await this.searchForContact(fromNumber);
 
             if (contactId !== null) {
