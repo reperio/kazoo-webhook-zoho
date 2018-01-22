@@ -18,23 +18,11 @@ const logger = {
         }
     }};
 
-const env = process.env.NODE_ENV || 'development';
-const configFilePath = path.join(__dirname, "../config", env + ".json");
-const userConfigFilePath = path.join(__dirname, "../config", env + ".user.json");
+const configFilePath = path.join(__dirname, "../config", "test.json");
+const userConfigFilePath = path.join(__dirname, "../config", "test.user.json");
 nconf
     .file("user_overrides", userConfigFilePath)
     .file("defaults", configFilePath);
-
-const config = nconf.get();
-delete config.type;
-delete config['$0'];
-delete config['_'];
-
-console.log(JSON.stringify(config));
-
-test('can access config objects', () => {
-    expect(config.dictionary).toBe(30000);
-});
 
 const dict = new dictionary(nconf, logger);
 
@@ -55,11 +43,4 @@ test('has key', () => {
 test('key cleanup', () => {
     dict.cleanKeys(true);
     expect(dict.hasKey('TEST')).toBe(false);
-});
-
-test('automatic key cleanup', () => {
-    dict.save('TEST');
-    setTimeout(() => {
-        expect(dict.hasKey('TEST').toBe(false));
-    }, 31000)
 });

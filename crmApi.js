@@ -1,5 +1,6 @@
 const request = require('request-promise-native');
 const xml = require('camaro');
+const phoneFormatter = require('phone-formatter');
 const moment = require('moment');
 
 
@@ -15,9 +16,10 @@ class CrmApi {
         this._logger.info('Forwarding call to zoho');
 
         try {
-            const xmlObject = this.buildXml(callRecord);
+            const callParameters = await this.buildParameters(callRecord);
+            const xmlObject = this.buildXml(callParameters);
             const httpOptions = {
-                uri: this.url,
+                uri: this.url + 'Calls/insertRecords',
                 method: 'POST',
                 headers: {
                     'Content-Type': 'multipart/form-data'
@@ -29,14 +31,12 @@ class CrmApi {
                 }
             };
             this._logger.info('Sending request');
-            const xmlResponse = await request(httpOptions);
-
-            this._logger.debug(xmlResponse);
-            const response = await this.parseXml(xmlResponse);
-            if (response == 'Record(s) added successfully') {
+            const response = await request(httpOptions);
+            const parsedResponse = JSON.parse(response).response;
+            if (parsedResponse.result.message == 'Record(s) added successfully') {
                 this._logger.info('Call successfully processed by zoho');
             } else {
-                this._logger.info('Zoho failed to process call');
+                this._logger.warn('Zoho failed to process call');
             }            
         } catch (err) {
             this._logger.error('Post to zoho failed');
@@ -45,35 +45,75 @@ class CrmApi {
         }
     }
 
-    buildXml(callRecord) {
-        return `<Calls>
-                    <row no="1">
-                        <FL val="Subject">
-                            ${callRecord.caller_id_name}
-                        </FL>
-                        <FL val="Call Type">
-                            ${callRecord.call_direction}
-                        </FL>
-                        <FL val="Call Start Time">
-                            ${moment.unix(callRecord.timestamp - 62167219200).format('YYYY-MM-DD hh:mm:ss')}
-                        </FL>
-                        <FL val="Call Duration">
-                            ${callRecord.duration / 60}:${callRecord % 60}
-                        </FL>
-                    </row>
-                </Calls>`;
-    }
-    
-    async parseXml(xmlObject) {
-        this._logger.debug(xmlObject);
+    async buildParameters(callRecord) {
+        let parameters = [];
 
-        return new Promise(resolve => {
-            const temp = {
-                message: 'response/result/message'
-            };
-            const json = xml(xmlObject, temp);
-            resolve(json.message);
-        })
+        parameters.push({ name: 'Subject', value: callRecord.caller_id_name});
+        parameters.push({ name: 'Call Type', value: callRecord.call_direction});
+        parameters.push({ name: 'Call Start Time', value: moment.unix(callRecord.timestamp - 62167219200).format('YYYY-MM-DD hh:mm:ss') });
+        parameters.push({ name: 'Call Duration', value: `${callRecord.duration_seconds / 60}:${callRecord.duration_seconds % 60}`});
+
+        try {
+            let contactId = null;
+            const fromNumber = callRecord.from.substr(1, 10);
+            contactId = await this.searchForContact(fromNumber);
+
+            if (contactId !== null) {
+                parameters.push({name: 'CONTACTID', value: contactId});
+            }
+        } catch (err) {
+            if (err === Error('To many results') || err === Error('No results returned')) {
+                this._logger.info('Could not find a contact with the given number.');
+            } else {
+                this._logger.error('Failed to search for contact');
+                throw err;
+            }
+        }
+
+        return parameters;
+    }
+
+    buildXml(parameters) {
+        const xmlStart = '<Calls><row no="1">';
+        const xmlEnd = '</row></Calls>';
+        let flStrings = [];
+
+        for (let i = 0; i < parameters.length; i++) {
+            flStrings.push(`<FL val="${parameters[i].name}">${parameters[i].value}</FL>`);
+        }
+
+        return xmlStart + flStrings.join('') + xmlEnd;
+    }
+
+    async searchForContact(contactNumber) {
+        const formattedNumber = phoneFormatter.format(contactNumber, 'NNN-NNN-NNNN'); //convert the phone number to the format used by zoho
+        const criteria = `((Phone:${formattedNumber})OR(Other Phone:${formattedNumber})OR(Mobile:${formattedNumber}))`;
+
+        const http_options = {
+            uri: this.url + `Contacts/searchRecords?authtoken=${this.authToken}&scope=crmapi&criteria=${criteria}`,
+            method: 'GET'
+        };
+
+        this._logger.info(`Searching for contact with criteria: ${criteria}`);
+
+        const response = await request(http_options);
+        const parsedResponse = JSON.parse(response).response;
+
+        if (typeof parsedResponse.nodata !== 'undefined') {
+            this._logger.warn('No contact returned');
+            throw new Error('No result returned');
+        } else if (parsedResponse.result.Contacts.row.length > 1) {
+            this._logger.warn('Response included more than one contact');
+            throw new Error('Too many results');
+        } 
+
+        const fields = parsedResponse.result.Contacts.row.FL;
+        for(let i = 0; i < fields.length; i++) {
+            if (fields[i].val === 'CONTACTID') {
+                return fields[i].content;
+            }
+        }
+        return null;
     }
 }
 

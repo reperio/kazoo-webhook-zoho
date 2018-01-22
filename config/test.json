@@ -1,7 +1,7 @@
 {
     "dictionary": {
-        "interval": 1000,
-        "retention": 30000
+        "interval": 500,
+        "retention": 3000
     },
     "kazoo": {
         "numbers": ["15136336533"]
