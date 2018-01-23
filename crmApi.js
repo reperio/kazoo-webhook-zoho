@@ -52,7 +52,7 @@ class CrmApi {
 
         parameters.push({ name: 'Subject', value: `Call from ${callRecord.caller_id_name || 'Unknown Name'} ${callRecord.caller_id_number ? phoneFormatter.format(callRecord.caller_id_number, '(NNN)NNN-NNNN') : 'Unknown Number'}`});
         parameters.push({ name: 'Call Type', value: callRecord.call_direction});
-        parameters.push({ name: 'Call Start Time', value: moment.unix(callRecord.timestamp - 62167219200).format('YYYY-MM-DD hh:mm:ss') });
+        parameters.push({ name: 'Call Start Time', value: moment.unix(callRecord.timestamp - 62167219200).format('YYYY-MM-DD HH:mm:ss') });
         parameters.push({ name: 'Call Duration', value: `${callRecord.duration_seconds >= 60 ? Math.floor(callRecord.duration_seconds / 60) : '00'}:${callRecord.duration_seconds % 60 < 10 ? '0' + callRecord.duration_seconds % 60 : callRecord.duration_seconds % 60}`});
 
         try {
