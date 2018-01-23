@@ -102,7 +102,7 @@ server.route({
 
         request.server.app.logger.info();
         request.server.app.logger.info('POST Received');
-        request.server.app.logger.info(callRecord);
+        //request.server.app.logger.info(callRecord);
 
         if (callRecord !== null) {
             callTo = callRecord.to.split('@');
