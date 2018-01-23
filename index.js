@@ -100,9 +100,9 @@ server.route({
     handler: (request) => {
         const callRecord = request.payload;
 
-        request.server.app.logger();
-        request.server.app.logger('POST Received');
-        request.server.app.logger(callRecord);
+        request.server.app.logger.info();
+        request.server.app.logger.info('POST Received');
+        request.server.app.logger.info(callRecord);
 
         if (callRecord !== null) {
             callTo = callRecord.to.split('@');
@@ -127,8 +127,8 @@ server.route({
                 }
             }
         }
-        request.server.app.logger('POST Finished');
-        request.server.app.logger();
+        request.server.app.logger.info('POST Finished');
+        request.server.app.logger.info();
         return '';
     }
 });
