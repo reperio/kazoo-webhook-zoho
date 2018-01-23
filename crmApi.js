@@ -34,7 +34,7 @@ class CrmApi {
             this._logger.info('Sending request');
             const response = await request(httpOptions);
             const parsedResponse = JSON.parse(response).response;
-            if (parsedResponse.result.message == 'Record(s) added successfully') {
+            if (parsedResponse.result.message === 'Record(s) added successfully') {
                 this._logger.info('Call successfully processed by zoho');
             } else {
                 this._logger.warn('Zoho failed to process call');
@@ -67,7 +67,7 @@ class CrmApi {
                 this._logger.info('Could not find a contact with the given number.');
             } else {
                 this._logger.error('Failed to search for contact');
-                throw err;
+                //throw err;
             }
         }
 
