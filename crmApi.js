@@ -1,7 +1,7 @@
 const request = require('request-promise-native');
 const xml = require('camaro');
 const phoneFormatter = require('phone-formatter');
-const moment = require('moment');
+const moment = require('moment-timezone');
 
 
 class CrmApi {
@@ -50,9 +50,11 @@ class CrmApi {
     async buildParameters(callRecord) {
         let parameters = [];
 
+        const direction = callRecord.call_direction.charAt(0).toUpperCase() + callRecord.call_direction.slice(1);
+
         parameters.push({ name: 'Subject', value: `Call from ${callRecord.caller_id_name || 'Unknown Name'} ${callRecord.caller_id_number ? phoneFormatter.format(callRecord.caller_id_number, '(NNN)NNN-NNNN') : 'Unknown Number'}`});
-        parameters.push({ name: 'Call Type', value: callRecord.call_direction});
-        parameters.push({ name: 'Call Start Time', value: moment.unix(callRecord.timestamp - 62167219200).format('YYYY-MM-DD HH:mm:ss') });
+        parameters.push({ name: 'Call Type', value: direction});
+        parameters.push({ name: 'Call Start Time', value: moment.unix(callRecord.timestamp - 62167219200).tz('America/New_York').format('YYYY-MM-DD HH:mm:ss') });
         parameters.push({ name: 'Call Duration', value: `${callRecord.duration_seconds >= 60 ? Math.floor(callRecord.duration_seconds / 60) : '00'}:${callRecord.duration_seconds % 60 < 10 ? '0' + callRecord.duration_seconds % 60 : callRecord.duration_seconds % 60}`});
 
         try {
