@@ -90,7 +90,7 @@ class CrmApi {
     }
 
     async searchForContact(contactNumber) {
-        const formattedNumber = phoneFormatter.format(contactNumber, 'NNN-NNN-NNNN'); //convert the phone number to the format used by zoho
+        const formattedNumber = phoneFormatter.normalize(contactNumber, 'NNN-NNN-NNNN'); //convert the phone number to the format used by zoho
         const criteria = `((Phone:${formattedNumber})OR(Other Phone:${formattedNumber})OR(Mobile:${formattedNumber}))`;
 
         const http_options = {
