@@ -32,6 +32,7 @@ class CrmApi {
                 }
             };
             this._logger.info('Sending request');
+            this._logger.info(xmlObject);
             const response = await request(httpOptions);
             const parsedResponse = JSON.parse(response).response;
             if (parsedResponse.result.message === 'Record(s) added successfully') {
@@ -95,10 +96,14 @@ class CrmApi {
             method: 'GET'
         };
 
-        this._logger.info(`Searching for contact with criteria: ${criteria}`);
+        this._logger.info('Searching for contact');
+        this._logger.info(http_options.uri);
 
         const response = await request(http_options);
         const parsedResponse = JSON.parse(response).response;
+
+        this._logger.info('Zoho response');
+        this._logger.info(parsedResponse);
 
         if (typeof parsedResponse.nodata !== 'undefined') {
             this._logger.warn('No contact returned');
