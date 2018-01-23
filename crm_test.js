@@ -73,25 +73,24 @@ const trace_logger = new (winston.Logger)({
 crmApi = new CrmApi(nconf, app_logger);
 
 const call = {
-    call_direction: "outbound",
+    call_direction: "inbound",
     timestamp: "63683271712",
     account_id: "d38abe802090d3216dff4993fd5ee186",
     request: "+15132882153@sevenhills.sip.reper.io",
-    to: "+15136336533@sevenhills.sip.reper.io",
-    from: "+15136336533@sevenhills.sip.reper.io",
-    call_id: "e1a8fc9e-fa3c-11e7-afd5-cb4e0c859163",
-    other_leg_call_id: "e1549bea-fa3c-11e7-afbd-cb4e0c859163",
+    to: "+15138184651@64.62.138.142",
+    from: "+15136336533@67.231.9.166",
+    call_id: "459843351_117288744@67.231.9.166",
     caller_id_name: "MEHL NOAH",
     caller_id_number: "+15136336533",
-    callee_id_name: "5132882153",
-    callee_id_number: "5132882153",
     reseller_id: "9f160666156d1803962bb7b5bd233b23",
+    authorizing_type: "resource",
     local_resource_used: "false",
     emergency_resource_used: "true",
     hook_event: "channel_destroy",
     hangup_cause: "ORIGINATOR_CANCEL",
-    duration_seconds: "8",
-    ringing_seconds: "0",
+    hangup_code: "sip:487",
+    duration_seconds: "9",
+    ringing_seconds: "1",
     billing_seconds: "0"
 }
 
