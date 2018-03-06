@@ -102,14 +102,17 @@ server.route({
 
         request.server.app.logger.info();
         request.server.app.logger.info('POST Received');
-        //request.server.app.logger.info(callRecord);
+        request.server.app.logger.info(JSON.stringify(callRecord));
 
         if (callRecord !== null) {
             callTo = callRecord.to.split('@');
             calledNumber = callTo[0].substr(1);
 
+            request.server.app.logger.info(`Checking Number: ${calledNumber} in ${inBoundNumbers.length} numbers`);
             for(let i=0;i<inBoundNumbers.length;i++) {
+                request.server.app.logger.info(`Comparing called number ${calledNumber} to configuration number ${inBoundNumbers[i]}`);
                 if (inBoundNumbers[i] === calledNumber && callRecord.call_direction === 'inbound') {
+                    request.server.app.logger.info(`Matched Number to inbound numbers`);
                     //check the dictionary to see if the call has been processed already
                     if (!dict.hasKey(callRecord.call_id)) {
                         request.server.app.logger.info(`Recieved call - ${callRecord.call_id}`);
@@ -121,7 +124,7 @@ server.route({
                         //forward the call record to zoho
                         crmApi.sendCall(callRecord);
                     } else {
-                        //call was already proccessed, so ignore it 
+                        //call was already proccessed, so ignore it
                         request.server.app.logger.warn(`Recieved duplicate call - ${callRecord.call_id}`);
                     }
                 }
@@ -140,26 +143,26 @@ server.start().then(() => {
 
 
 /*
-    Example request payload: 
+    Example request payload:
 {
-	"call_direction": "inbound",
-	"timestamp": "63683271712",
-	"account_id": "d38abe802090d3216dff4993fd5ee186",
-	"request": "+15138184651@64.62.138.142",
-	"to": "+15138184651@64.62.138.142",
-	"from": "+15136336533@67.231.9.166",
-	"call_id": "459843351_117288744@67.231.9.166",
-	"caller_id_name": "MEHL NOAH",
-	"caller_id_number": "+15136336533",
-	"reseller_id": "9f160666156d1803962bb7b5bd233b23",
-	"authorizing_type": "resource",
-	"local_resource_used": "false",
-	"emergency_resource_used": "false",
-	"hook_event": "channel_destroy",
-	"hangup_cause": "ORIGINATOR_CANCEL",
-	"hangup_code": "sip:487",
-	"duration_seconds": "9",
-	"ringing_seconds": "1",
-	"billing_seconds": "0"
+        "call_direction": "inbound",
+        "timestamp": "63683271712",
+        "account_id": "d38abe802090d3216dff4993fd5ee186",
+        "request": "+15138184651@64.62.138.142",
+        "to": "+15138184651@64.62.138.142",
+        "from": "+15136336533@67.231.9.166",
+        "call_id": "459843351_117288744@67.231.9.166",
+        "caller_id_name": "MEHL NOAH",
+        "caller_id_number": "+15136336533",
+        "reseller_id": "9f160666156d1803962bb7b5bd233b23",
+        "authorizing_type": "resource",
+        "local_resource_used": "false",
+        "emergency_resource_used": "false",
+        "hook_event": "channel_destroy",
+        "hangup_cause": "ORIGINATOR_CANCEL",
+        "hangup_code": "sip:487",
+        "duration_seconds": "9",
+        "ringing_seconds": "1",
+        "billing_seconds": "0"
 }
 */
