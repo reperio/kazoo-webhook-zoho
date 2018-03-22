@@ -116,11 +116,13 @@ server.route({
 
             request.server.app.logger.info(`Checking ignored list for from number: ${callFromNumber}`);
             for (let i = 0 ; i < ignoredFromNumbers.length; ++i) {
+                request.server.app.logger.info(`Checking ${ignoredFromNumbers[i]} against ${callFromNumber}`);
                 if (ignoredFromNumbers[i] === callFromNumber) {
                     request.server.app.logger.info(`Ignoring call from: ${callFromNumber}`);
                     return '';
                 }
             }
+            request.server.app.logger.info('Ignored number checks passed.');
 
             request.server.app.logger.info(`Checking Number: ${calledNumber} in ${inBoundNumbers.length} numbers`);
             for(let i=0;i<inBoundNumbers.length;i++) {
