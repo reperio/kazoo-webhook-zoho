@@ -97,6 +97,15 @@ server.events.on({ name: 'request', channels: 'error' }, (request, event, tags) 
     server.app.logger.error('An error happened... somewhere');
 });
 
+function cleanNumber(phoneNumber) {
+    const cleanedPhoneNumber = phoneNumber.replace('+', '');
+    if (cleanedPhoneNumber[0] === '1') {
+        return cleanedPhoneNumber.substr(1);
+    }
+
+    return cleanedPhoneNumber;
+}
+
 server.route({
     method: ['POST', 'GET'],
     path: '/',
@@ -111,8 +120,8 @@ server.route({
             const callTo = callRecord.to.split('@');
             const callFrom = callRecord.from.split('@');
 
-            const callFromNumber = callFrom[0].substr(1);
-            const calledNumber = callTo[0].substr(1);
+            const callFromNumber = cleanNumber(callFrom[0]);
+            const calledNumber = cleanNumber(callTo[0]);
 
             request.server.app.logger.info(`Checking ignored list for from number: ${callFromNumber}`);
             for (let i = 0 ; i < ignoredFromNumbers.length; ++i) {

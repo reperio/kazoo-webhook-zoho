@@ -35,7 +35,7 @@ class CrmApi {
             this._logger.info(xmlObject);
             const response = await request(httpOptions);
             const parsedResponse = JSON.parse(response).response;
-            if (parsedResponse.result.message === 'Record(s) added successfully') {
+            if (parsedResponse.result && parsedResponse.result.message === 'Record(s) added successfully') {
                 this._logger.info('Call successfully processed by zoho');
             } else {
                 this._logger.warn('Zoho failed to process call');
