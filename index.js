@@ -17,7 +17,10 @@ nconf
     .file("defaults", configFilePath);
 
 const inBoundNumbers = nconf.get('kazoo:numbers');
-console.log("inBoundNumbers: " + JSON.stringify(inBoundNumbers));
+const ignoredFromNumbers = nconf.get('kazoo:ignored_from_numbers');
+console.log(`inBoundNumbers: ${JSON.stringify(inBoundNumbers)}`);
+console.log(`ignoredFromNumbers: ${JSON.stringify(ignoredFromNumbers)}`);
+
 //create a server
 const server = new Hapi.Server({
     port: nconf.get('server:port'),
@@ -105,8 +108,19 @@ server.route({
         request.server.app.logger.info(JSON.stringify(callRecord));
 
         if (callRecord !== null) {
-            callTo = callRecord.to.split('@');
-            calledNumber = callTo[0].substr(1);
+            const callTo = callRecord.to.split('@');
+            const callFrom = callRecord.from.split('@');
+
+            const callFromNumber = callFrom[0].substr(1);
+            const calledNumber = callTo[0].substr(1);
+
+            request.server.app.logger.info(`Checking ignored list for from number: ${callFromNumber}`);
+            for (let i = 0 ; i < ignoredFromNumbers.length; ++i) {
+                if (ignoredFromNumbers[i] === callFromNumber) {
+                    request.server.app.logger.info(`Ignoring call from: ${callFromNumber}`);
+                    return '';
+                }
+            }
 
             request.server.app.logger.info(`Checking Number: ${calledNumber} in ${inBoundNumbers.length} numbers`);
             for(let i=0;i<inBoundNumbers.length;i++) {

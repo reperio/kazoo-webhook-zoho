@@ -4,7 +4,8 @@
         "retention": 60000
     },
     "kazoo": {
-        "numbers": ["15138184651"]
+        "numbers": ["15138184651"],
+        "ignored_from_numbers": [""]
     },
     "logging": {
         "directory": "./logs",
