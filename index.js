@@ -99,9 +99,6 @@ server.events.on({ name: 'request', channels: 'error' }, (request, event, tags) 
 
 function cleanNumber(phoneNumber) {
     const cleanedPhoneNumber = phoneNumber.replace('+', '');
-    if (cleanedPhoneNumber[0] === '1') {
-        return cleanedPhoneNumber.substr(1);
-    }
 
     return cleanedPhoneNumber;
 }
